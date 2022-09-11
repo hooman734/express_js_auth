@@ -1,5 +1,6 @@
+const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const db = require(path.resolve(__dirname, '..', 'Utilities', 'mysql2Connection.js'));
+const db = require(path.resolve(__dirname, '..', 'Utilities', 'sqliteDB.js'));
 
 // make accesible the environment variables
 require('dotenv').config();
@@ -7,9 +8,9 @@ require('dotenv').config();
 const table = process.env.PERSON_TABLE;
 
 class Person {
-    constructor(id, userName, name, surname, location, birthdate, password) {
+    constructor(id, user_name, name, surname, location, birthdate, password) {
         this.id = id;
-        this.userName = userName;
+        this.user_name = user_name;
         this.name = name;
         this.surname = surname;
         this.location = location;
@@ -17,16 +18,18 @@ class Person {
         this.password = password;
     }
 
-    static getAll() {
-        return db.execute(`SELECT id, user_name FROM ${table}`);
+    static async getAll() {
+        return await db.retrievAll(table);
     }
 
-    static getPersonById(id) {
-        return db.execute(`SELECT * FROM ${table} WHERE id = ?`, [id]);
+    static async getPersonById(id) {
+        return await db.retrieveById(table, id);
     }
 
-    static setPerson(person) {
-        return db.execute(`INSERT INTO ${table} (user_name, name, surname, location, birthdate, password) VALUES (?, ?, ?, ?, ? , ?)`, [person.userName, person.firstName, person.lastName, person.location, person.birthDate, person.password]);
+    static async setPerson(input) {
+        const id = uuidv4();
+        const person = new Person(id, input.userName, input.firstName, input.lastName, input.location, new Date(input.birthDate), input.password);
+        return await db.save(table, person);
     }
 
 }
