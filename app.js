@@ -21,27 +21,25 @@ app.use('/static', express.static(path.resolve(__dirname, 'Public')));
 app.set('view engine', 'ejs');
 app.set('views', path.resolve(__dirname, 'Views'));
 
-// set session store
-const options = {
-  host: process.env.MYSQl_HOST,
-  port: process.env.MYSQL_PORT,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DB
-};
-
 // make session store ready
-const sessionStore = new mySQLStore(options);
+const sqlite = require("better-sqlite3");
+const SqliteStore = require("better-sqlite3-session-store")(session);
+
+const db = new sqlite("sessions.db");
 
 // set session
 app.use(session({
   secret: process.env.SESSION_KEY,
-  // store: sessionStore,
   resave: false,
   saveUninitialized: true,
-  // cookie: { secure: true }
+  store: new SqliteStore({
+    client: db,
+    expired: {
+      clear: true,
+      intervalMs: 900000 //ms = 15min
+    }
+  }),
 }));
-
 
 // insert controllers
 const welcomeRouter = require(path.resolve(__dirname, 'Controllers', 'welcome.route.js'));
