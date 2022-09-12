@@ -1,17 +1,15 @@
-FROM node:16
-
+FROM node:18-alpine3.15
 # create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # install app dependencies
 COPY package.json ./
-COPY yarn.lock ./
 RUN yarn install
 
 # bundle app source
-COPY . .
+ADD . .
 
 # port
 EXPOSE 8080
 
-CMD ["node", 'app.js']
+CMD "node" 'app.js'
