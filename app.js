@@ -3,7 +3,7 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const mySQLStore = require('express-mysql-session')(session);
+
 
 // make accesible the environment variables
 require('dotenv').config();
@@ -22,22 +22,15 @@ app.set('view engine', 'ejs');
 app.set('views', path.resolve(__dirname, 'Views'));
 
 // make session store ready
-const sqlite = require("better-sqlite3");
-const SqliteStore = require("better-sqlite3-session-store")(session);
-
-const db = new sqlite("sessions.db");
+const MemoryStore = require('memorystore')(session);
 
 // set session
 app.use(session({
   secret: process.env.SESSION_KEY,
   resave: false,
   saveUninitialized: true,
-  store: new SqliteStore({
-    client: db,
-    expired: {
-      clear: true,
-      intervalMs: 900000 //ms = 15min
-    }
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
   }),
 }));
 

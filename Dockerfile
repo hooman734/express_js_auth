@@ -1,6 +1,7 @@
-FROM node:18-alpine3.15
+FROM node:latest
+
 # create app directory
-WORKDIR /app
+WORKDIR /src/app
 
 # install app dependencies
 COPY package.json ./
@@ -10,6 +11,7 @@ RUN yarn install
 ADD . .
 
 # port
-EXPOSE 8080
+EXPOSE 3333
 
-CMD "node" 'app.js'
+# entry point
+ENTRYPOINT 'node' 'app.js'
